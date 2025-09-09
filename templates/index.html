@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eDNA Sequence Analysis Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f0fdf4 100%);
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .title-section h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .title-section p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .file-status {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f0fdf4;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Container and Navigation */
+        .container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .tab-button.active {
+            background: #2563eb;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #f9fafb;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            padding: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            background: #fafafa;
+            border-radius: 0.75rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area.has-file {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .upload-icon {
+            width: 4rem;
+            height: 4rem;
+            color: #9ca3af;
+            margin: 0 auto 1rem;
+            font-size: 4rem;
+        }
+
+        .upload-area.has-file .upload-icon {
+            color: #16a34a;
+        }
+
+        .parameters-section {
+            margin-top: 2rem;
+            background: #eff6ff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .parameters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #1d4ed8;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+        }
+
+        .analyze-button {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .analyze-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Results Section */
+        .results-container {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            padding: 2rem;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 5rem 0;
+        }
+
+        .status-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            font-size: 4rem;
+        }
+
+        .loading {
+            color: #f59e0b;
+            animation: spin 1s linear infinite;
+        }
+
+        .success {
+            color: #10b981;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Download Section */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .download-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .download-button {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .download-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Placeholder charts */
+        .chart-placeholder {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            height: 24rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-placeholder-content {
+            text-align: center;
+        }
+
+        .chart-placeholder-icon {
+            width: 4rem;
+            height: 4rem;
+            color: #d1d5db;
+            margin: 0 auto 1rem;
+            font-size: 4rem;
+        }
+
+        /* Utility classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-success { color: #16a34a; }
+        .text-error { color: #dc2626; }
+        .text-muted { color: #6b7280; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 70px;width: 70px;">
+                    
+                    <!--<i class="fas fa-dna"></i>-->
+                </div>
+                <div class="title-section">
+                    <h1>eDNA Sequence Analysis Platform</h1>
+                    <p>Advanced clustering and taxonomic identification for environmental DNA</p>
+                </div>
+            </div>
+            <div id="fileStatus" class="file-status">
+                <i class="fas fa-check-circle" style="color: #16a34a;"></i>
+                <span id="fileName"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-button active" data-tab="upload">
+                <i class="fas fa-upload"></i>
+                <span>Upload & Analyze</span>
+            </button>
+            <button class="tab-button" data-tab="results">
+                <i class="fas fa-chart-bar"></i>
+                <span>Cluster Visualization</span>
+            </button>
+            <button class="tab-button" data-tab="taxonomy">
+                <i class="fas fa-tree"></i>
+                <span>Taxonomic Tree</span>
+            </button>
+            <button class="tab-button" data-tab="heatmap">
+                <i class="fas fa-chart-area"></i>
+                <span>Abundance Heatmap</span>
+            </button>
+            <button class="tab-button" data-tab="reports">
+                <i class="fas fa-file-download"></i>
+                <span>Download Reports</span>
+            </button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div id="upload" class="tab-content active">
+            <div class="upload-container">
+                <div class="upload-card">
+                    <h2 class="mb-3" style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Upload FASTQ File</h2>
+                    
+                    <div id="uploadArea" class="upload-area">
+                        <input type="file" id="fileInput" accept=".fastq" style="display: none;">
+                        <div id="uploadContent">
+                            <i class="fas fa-upload upload-icon"></i>
+                            <div>
+                                <p style="font-size: 1.125rem; font-weight: 600; color: #374151;" class="mb-1">
+                                    Click to upload your FASTQ file
+                                </p>
+                                <p class="text-muted">Or drag and drop your .fastq file here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="parametersSection" class="parameters-section hidden">
+                        <h3 style="font-weight: 600; color: #1e3a8a;" class="mb-1">Analysis Parameters</h3>
+                        <div class="parameters-grid">
+                            <div class="form-group">
+                                <label>Clustering Threshold</label>
+                                <select id="clusteringThreshold">
+                                    <option value="97">97% similarity</option>
+                                    <option value="95">95% similarity</option>
+                                    <option value="99">99% similarity</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Min. Sequence Length</label>
+                                <input type="number" id="minSequenceLength" placeholder="100" value="100">
+                            </div>
+                        </div>
+                        
+                        <button id="analyzeButton" class="analyze-button">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Start Analysis</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div id="results" class="tab-content">
+            <div class="results-container">
+                <div id="resultsContent" class="status-message">
+                    <i class="fas fa-info-circle status-icon text-muted"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937;" class="mb-1">No Analysis Yet</h3>
+                    <p class="text-muted">Upload a FASTQ file to begin analysis</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taxonomy Tab -->
+        <div id="taxonomy" class="tab-content">
+            <div class="results-container">
+                <div style="display: flex; align-items: center; justify-content: space-between;" class="mb-3">
+                    <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;">Interactive Taxonomic Tree</h2>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="position: relative;">
+                            <i class="fas fa-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                            <input type="text" placeholder="Search taxa..." style="padding: 0.5rem 0.5rem 0.5rem 2.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                        </div>
+                        <button style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #f3f4f6; border-radius: 0.5rem; border: none; cursor: pointer;">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-content">
+                        <i class="fas fa-tree chart-placeholder-icon"></i>
+                        <p style="color: #6b7280; font-weight: 500;">Interactive Taxonomic Tree</p>
+                        <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 0.5rem;">
+                            Hierarchical visualization from phylum to species level
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heatmap Tab -->
+        <div id="heatmap" class="tab-content">
+            <div class="results-container">
+                <div style="display: flex; align-items: center; gap: 0.75rem;" class="mb-2">
+                    <h3 style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">Taxa Abundance Heatmap</h3>
+                </div>
+                
+                <div class="chart-placeholder">
+                    <div class="chart-placeholder-content">
+                        <i class="fas fa-chart-area chart-placeholder-icon"></i>
+                        <p style="color: #6b7280; font-weight: 500;">Abundance patterns across samples and locations</p>
+                        <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 0.5rem;">
+                            Visualization will appear here after analysis
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="results-container">
+                <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937;" class="mb-3">Download Reports</h2>
+                
+                <div class="download-grid">
+                    <div class="download-card">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937;" class="mb-1">Raw Analysis Output</h3>
+                        <p class="text-muted mb-2">Complete clustering results and sequence alignments</p>
+                        <button class="download-button" data-report="raw">
+                            <i class="fas fa-download"></i>
+                            <span>Download (.zip)</span>
+                        </button>
+                    </div>
+
+                    <div class="download-card">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937;" class="mb-1">Summary Report</h3>
+                        <p class="text-muted mb-2">Comprehensive analysis summary and statistics</p>
+                        <button class="download-button" data-report="summary">
+                            <i class="fas fa-download"></i>
+                            <span>Download (.txt)</span>
+                        </button>
+                    </div>
+
+                    <div class="download-card">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937;" class="mb-1">Visualizations</h3>
+                        <p class="text-muted mb-2">High-resolution charts and graphs (PNG, SVG)</p>
+                        <button class="download-button" data-report="visualizations">
+                            <i class="fas fa-download"></i>
+                            <span>Download (.zip)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let appState = {
+            uploadedFile: null,
+            isAnalyzing: false,
+            analysisComplete: false
+        };
+
+        // DOM elements
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadContent = document.getElementById('uploadContent');
+        const parametersSection = document.getElementById('parametersSection');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const fileStatus = document.getElementById('fileStatus');
+        const fileName = document.getElementById('fileName');
+        const resultsContent = document.getElementById('resultsContent');
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                switchTab(tabId);
+            });
+        });
+
+        function switchTab(tabId) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            // Update active tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#2563eb';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (!appState.uploadedFile) {
+                uploadArea.style.borderColor = '#d1d5db';
+            }
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileUpload();
+            }
+        });
+
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.fastq')) {
+                alert('Please upload a valid .fastq file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    appState.uploadedFile = {
+                        name: data.filename,
+                        size: data.size
+                    };
+                    updateUploadUI();
+                } else {
+                    alert(data.error || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                alert('Upload failed');
+            });
+        }
+
+        function updateUploadUI() {
+            if (appState.uploadedFile) {
+                uploadArea.classList.add('has-file');
+                uploadContent.innerHTML = `
+                    <i class="fas fa-check-circle upload-icon"></i>
+                    <div>
+                        <p style="font-size: 1.125rem; font-weight: 600; color: #15803d;" class="mb-1">
+                            ${appState.uploadedFile.name}
+                        </p>
+                        <p class="text-success">
+                            File size: ${(appState.uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                    </div>
+                `;
+                parametersSection.classList.remove('hidden');
+                
+                // Update header status
+                fileName.textContent = appState.uploadedFile.name;
+                fileStatus.style.display = 'flex';
+            }
+        }
+
+        // Analysis handling
+        analyzeButton.addEventListener('click', startAnalysis);
+
+        function startAnalysis() {
+            const formData = new FormData();
+            formData.append('clustering_threshold', document.getElementById('clusteringThreshold').value);
+            formData.append('min_sequence_length', document.getElementById('minSequenceLength').value);
+
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    appState.isAnalyzing = true;
+                    switchTab('results');
+                    checkAnalysisStatus();
+                } else {
+                    alert(data.error || 'Analysis failed');
+                }
+            })
+            .catch(error => {
+                console.error('Analysis error:', error);
+                alert('Analysis failed');
+            });
+        }
+
+        function checkAnalysisStatus() {
+            fetch('/analysis_status')
+            .then(response => response.json())
+            .then(data => {
+                appState.isAnalyzing = data.is_analyzing;
+                appState.analysisComplete = data.analysis_complete;
+
+                updateResultsUI(data);
+
+                if (data.is_analyzing) {
+                    setTimeout(checkAnalysisStatus, 1000); // Check again in 1 second
+                }
+            })
+            .catch(error => {
+                console.error('Status check error:', error);
+            });
+        }
+
+        function updateResultsUI(data) {
+            if (data.is_analyzing) {
+                resultsContent.innerHTML = `
+                    <i class="fas fa-spinner status-icon loading"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937;" class="mb-1">Analyzing Sequences...</h3>
+                    <p class="text-muted">Processing your FASTQ file, please wait...</p>
+                `;
+            } else if (data.analysis_complete && data.results) {
+                const results = data.results;
+                resultsContent.innerHTML = `
+                    <i class="fas fa-check-circle status-icon success"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937;" class="mb-1">Analysis Complete!</h3>
+                    <div style="background: #f0fdf4; border-radius: 0.5rem; padding: 1.5rem; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        <h4 style="font-weight: 600; color: #15803d; margin-bottom: 1rem;">Results Summary</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left;">
+                            <div>
+                                <p style="font-weight: 500; color: #166534;">Total Sequences:</p>
+                                <p style="font-size: 1.5rem; font-weight: bold; color: #15803d;">${results.total_sequences.toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p style="font-weight: 500; color: #166534;">Clusters Found:</p>
+                                <p style="font-size: 1.5rem; font-weight: bold; color: #15803d;">${results.clusters_found}</p>
+                            </div>
+                            <div>
+                                <p style="font-weight: 500; color: #166534;">Species Identified:</p>
+                                <p style="font-size: 1.5rem; font-weight: bold; color: #15803d;">${results.species_identified}</p>
+                            </div>
+                            <div>
+                                <p style="font-weight: 500; color: #166534;">Threshold Used:</p>
+                                <p style="font-size: 1.5rem; font-weight: bold; color: #15803d;">${results.parameters.clustering_threshold}%</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Enable download buttons
+                document.querySelectorAll('.download-button').forEach(btn => {
+                    btn.disabled = false;
+                });
+            } else {
+                resultsContent.innerHTML = `
+                    <i class="fas fa-info-circle status-icon text-muted"></i>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937;" class="mb-1">No Analysis Yet</h3>
+                    <p class="text-muted">Upload a FASTQ file to begin analysis</p>
+                `;
+            }
+        }
+
+        // Download handling
+        document.querySelectorAll('.download-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const reportType = e.target.closest('button').getAttribute('data-report');
+                downloadReport(reportType);
+            });
+        });
+
+        function downloadReport(reportType) {
+            if (!appState.analysisComplete) {
+                alert('Please complete analysis first');
+                return;
+            }
+
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = `/download/${reportType}`;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize download buttons as disabled
+        document.querySelectorAll('.download-button').forEach(btn => {
+            btn.disabled = true;
+        });
+
+        // Reset functionality (optional)
+        function resetAnalysis() {
+            fetch('/reset')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reset UI
+                    appState = {
+                        uploadedFile: null,
+                        isAnalyzing: false,
+                        analysisComplete: false
+                    };
+                    
+                    // Reset upload area
+                    uploadArea.classList.remove('has-file');
+                    uploadContent.innerHTML = `
+                        <i class="fas fa-upload upload-icon"></i>
+                        <div>
+                            <p style="font-size: 1.125rem; font-weight: 600; color: #374151;" class="mb-1">
+                                Click to upload your FASTQ file
+                            </p>
+                            <p class="text-muted">Or drag and drop your .fastq file here</p>
+                        </div>
+                    `;
+                    parametersSection.classList.add('hidden');
+                    fileStatus.style.display = 'none';
+                    
+                    // Reset results
+                    updateResultsUI({ is_analyzing: false, analysis_complete: false });
+                    
+                    // Disable download buttons
+                    document.querySelectorAll('.download-button').forEach(btn => {
+                        btn.disabled = true;
+                    });
+                    
+                    // Switch to upload tab
+                    switchTab('upload');
+                }
+            });
+        }
+
+        // Add reset button (optional - you can add this to the UI if desired)
+        // document.addEventListener('keydown', (e) => {
+        //     if (e.ctrlKey && e.key === 'r') {
+        //         e.preventDefault();
+        //         resetAnalysis();
+        //     }
+        // });
+    </script>
+</body>
+</html>
